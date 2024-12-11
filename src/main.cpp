@@ -3,6 +3,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
+#include <ArduinoOTA.h>
 #include "names.h"
 #include "web_admin.h"
 #include "web_interface.h"
@@ -44,6 +45,40 @@ void setup() {
   Serial.print("IP-Adresse: ");
   Serial.println(WiFi.localIP());
 
+  // OTA initialisieren
+  ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH) {
+      type = "Sketch";
+    } else { // U_SPIFFS
+      type = "SPIFFS";
+    }
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnde der Aktualisierung");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Fortschritt: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Fehler [%u]: ", error);
+    if (error == OTA_AUTH_ERROR) {
+      Serial.println("Auth Fehler");
+    } else if (error == OTA_BEGIN_ERROR) {
+      Serial.println("Begin Fehler");
+    } else if (error == OTA_CONNECT_ERROR) {
+      Serial.println("Verbindungsfehler");
+    } else if (error == OTA_RECEIVE_ERROR) {
+      Serial.println("Empfangsfehler");
+    } else if (error == OTA_END_ERROR) {
+      Serial.println("End Fehler");
+    }
+  });
+  ArduinoOTA.begin();
+  Serial.println("OTA bereit");
+
   // NeoPixel initialisieren
   np.begin();
   np.setBrightness(brightness);
@@ -60,6 +95,7 @@ void setup() {
 }
 
 void loop() {
+  ArduinoOTA.handle();
   server.handleClient();
 }
 
