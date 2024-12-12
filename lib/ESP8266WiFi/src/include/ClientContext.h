@@ -484,7 +484,8 @@ protected:
 
             _send_waiting = true;
             // will resume on timeout or when _write_some_from_cb or _notify_error fires
-            esp_delay(_timeout_ms, [this]() { return this->_send_waiting; });
+            //esp_delay(_timeout_ms, [this]() { return this->_send_waiting; });
+            delay(_timeout_ms);
             _send_waiting = false;
         } while(true);
 
