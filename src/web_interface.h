@@ -79,6 +79,9 @@ const char WEBINTERFACE[] PROGMEM = R"=====(
           });
       });
   </script>
+  
+<button onclick="fetch('/api/v1/effect?effect=candle')">Kerzenlicht</button>
+<button onclick="fetch('/api/v1/reset')">Effekt stoppen</button>
 </body>
 </html>
 )=====";

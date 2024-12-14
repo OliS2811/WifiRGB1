@@ -1,5 +1,8 @@
+#ifndef NAMES_H
+#define NAMES_H
+
 struct RGB {
-  byte r;
-  byte g;
-  byte b;
+  byte r, g, b;
 };
+
+#endif // NAMES_H
