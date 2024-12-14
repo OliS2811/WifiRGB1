@@ -9,6 +9,7 @@
 #include "names.h" // Enthält die RGB-Definition
 #include "web_admin.h"
 #include "web_interface.h"
+#include "sinricpro_handler.h"
 
 int currentBrightness = 255; // Standardhelligkeit (maximal)
 
@@ -18,7 +19,7 @@ String activeEffect = "";
 // WLAN-Konfiguration
 const char* ssid = "FRITZ!BoxSA";
 const char* password = "Raissa2200!";
-const char* deviceName = "WifiRGB-Test";
+const char* deviceName = "RGB-Stripe-Test";
 
 // NeoPixel-Konfiguration
 #define NEOPIXEL_PIN D4 // GPIO-Pin für NeoPixel-Daten
@@ -66,7 +67,7 @@ void setup(void) {
   }
 
   // OTA-Setup
-  ArduinoOTA.setHostname("RGB-Strip-Test");
+  ArduinoOTA.setHostname("RGB-Stripe-Test");
 
   ArduinoOTA.onStart([]() {
       String type;
@@ -106,6 +107,9 @@ void setup(void) {
   pixels.clear();
   pixels.show();
 
+  // SinricPro initialisieren
+  setupSinricPro();
+
   // Web-Interface und REST-API
   server.on("/ui", HTTP_GET, []() {
     server.send_P(200, "text/html", WEBINTERFACE);
@@ -125,12 +129,22 @@ void setup(void) {
 
 void loop(void) {
   server.handleClient();
+  handleSinricPro(); // SinricPro Ereignisse verarbeiten
 
   // Aktiven Effekt ausführen
   if (activeEffect == "candle") {
     candleEffect();
+  } else if (activeEffect == "rainbow") {
+    rainbowEffect();
+  } else if (activeEffect == "sunrise") {
+    sunriseEffect();
+  } else if (activeEffect == "thunderstorm") {
+    thunderstormEffect();
+  } else if (activeEffect == "aurora") {
+    auroraEffect();
+  } else if (activeEffect == "colorExplosion") {
+    colorExplosionEffect();
   }
-  // Weitere Effekte können hier hinzugefügt werden
 }
 
 // Effekt-Handler
@@ -221,37 +235,37 @@ void setNeoPixelColor(int r, int g, int b) {
 
 // Funktion zur Umrechnung von HSV in RGB
 RGB hsvToRgb(double h, double s, double v) {
-  int i;
-  double f, p, q, t;
-  byte r, g, b;
+    int i;
+    double f, p, q, t;
+    byte r, g, b;
 
-  h = max(0.0, min(360.0, h));
-  s = max(0.0, min(100.0, s));
-  v = max(0.0, min(100.0, v));
+    h = max(0.0, min(360.0, h));
+    s = max(0.0, min(100.0, s));
+    v = max(0.0, min(100.0, v));
 
-  s /= 100;
-  v /= 100;
+    s /= 100;
+    v /= 100;
 
-  if (s == 0) {
-    r = g = b = round(v * 255);
+    if (s == 0) {
+        r = g = b = round(v * 255);
+        return {r, g, b};
+    }
+
+    h /= 60;
+    i = floor(h);
+    f = h - i;
+    p = v * (1 - s);
+    q = v * (1 - s * f);
+    t = v * (1 - s * (1 - f));
+
+    switch (i) {
+        case 0: r = round(255 * v); g = round(255 * t); b = round(255 * p); break;
+        case 1: r = round(255 * q); g = round(255 * v); b = round(255 * p); break;
+        case 2: r = round(255 * p); g = round(255 * v); b = round(255 * t); break;
+        case 3: r = round(255 * p); g = round(255 * q); b = round(255 * v); break;
+        case 4: r = round(255 * t); g = round(255 * p); b = round(255 * v); break;
+        default: r = round(255 * v); g = round(255 * p); b = round(255 * q); break;
+    }
+
     return {r, g, b};
-  }
-
-  h /= 60;
-  i = floor(h);
-  f = h - i;
-  p = v * (1 - s);
-  q = v * (1 - s * f);
-  t = v * (1 - s * (1 - f));
-
-  switch (i) {
-    case 0: r = round(255 * v); g = round(255 * t); b = round(255 * p); break;
-    case 1: r = round(255 * q); g = round(255 * v); b = round(255 * p); break;
-    case 2: r = round(255 * p); g = round(255 * v); b = round(255 * t); break;
-    case 3: r = round(255 * p); g = round(255 * q); b = round(255 * v); break;
-    case 4: r = round(255 * t); g = round(255 * p); b = round(255 * v); break;
-    default: r = round(255 * v); g = round(255 * p); b = round(255 * q); break;
-  }
-
-  return {r, g, b};
 }

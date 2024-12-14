@@ -80,8 +80,14 @@ const char WEBINTERFACE[] PROGMEM = R"=====(
       });
   </script>
   
-<button onclick="fetch('/api/v1/effect?effect=candle')">Kerzenlicht</button>
-<button onclick="fetch('/api/v1/reset')">Effekt stoppen</button>
+<h1>RGB-Stripe Szenen</h1>
+    <button onclick="fetch('/api/v1/effect?effect=candle')">Kerzenlicht</button>
+    <button onclick="fetch('/api/v1/effect?effect=rainbow')">Regenbogen</button>
+    <button onclick="fetch('/api/v1/effect?effect=sunrise')">Sonnenaufgang</button>
+    <button onclick="fetch('/api/v1/effect?effect=thunderstorm')">Gewitter</button>
+    <button onclick="fetch('/api/v1/effect?effect=aurora')">Polarlicht</button>
+    <button onclick="fetch('/api/v1/effect?effect=colorExplosion')">Farbexplosion</button>
+    <button onclick="fetch('/api/v1/reset')">Effekt stoppen</button>
 </body>
 </html>
 )=====";
