@@ -10,6 +10,7 @@
 #include "web_admin.h"
 #include "web_interface.h"
 #include "sinricpro_handler.h"
+#include "Storage.h"
 
 int currentBrightness = 255; // Standardhelligkeit (maximal)
 
@@ -101,11 +102,14 @@ void setup(void) {
   Serial.println("OTA ist bereit");
   Serial.print("Hostname: ");
   Serial.println(ArduinoOTA.getHostname());
-
   // NeoPixel-Setup
   pixels.begin();
   pixels.clear();
   pixels.show();
+
+  // Speicher initialisieren und Zustand laden
+  initStorage();
+  loadState();
 
   // SinricPro initialisieren
   setupSinricPro();
@@ -159,11 +163,11 @@ void handleEffectRequest() {
 
   String effectName = server.arg("effect");
   activeEffect = effectName; // Effekt aktivieren
+  saveState(); // Zustand speichern
   Serial.println("Effekt-Anfrage: " + effectName);
 
   server.send(200, "application/json", "{\"effect\":\"" + effectName + "\"}");
 }
-
 // API-Handler
 void handleApiRequest() {
   if (!server.hasArg("plain")) {
@@ -192,6 +196,7 @@ void handleApiRequest() {
   if (!activeEffect.isEmpty()) {
     if (root["brightness"].is<int>()) {
       currentBrightness = root["brightness"];
+      saveState(); // Zustand speichern
       Serial.println("Helligkeit während Effekt gesetzt auf: " + String(currentBrightness));
     }
     server.send(200, "application/json", "{\"status\":\"OK\"}");
@@ -201,6 +206,7 @@ void handleApiRequest() {
   // Wenn kein Effekt aktiv ist, setzen wir die Farbe und Helligkeit
   if (root["brightness"].is<int>()) {
     currentBrightness = root["brightness"];
+    saveState(); // Zustand speichern
     Serial.println("Helligkeit gesetzt auf: " + String(currentBrightness));
   }
 
@@ -222,6 +228,7 @@ void resetOutputs() {
   setNeoPixelColor(0, 0, 0);
   activeEffect = ""; // Effekt deaktivieren
   currentBrightness = 255;   // Helligkeit zurücksetzen
+  saveState(); // Zustand speichern
   Serial.println("Alle LEDs aus, Effekt deaktiviert, Helligkeit zurückgesetzt");
 }
 
