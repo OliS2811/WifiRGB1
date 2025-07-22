@@ -19,7 +19,7 @@ String activeEffect = "";
 
 // WLAN-Konfiguration
 const char* ssid = "FRITZ!BoxSA";
-const char* password = "Raissa2200!";
+const char* password = "*********";
 const char* deviceName = "RGB-Stripe-Test";
 
 // NeoPixel-Konfiguration
